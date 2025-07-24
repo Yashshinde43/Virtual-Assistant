@@ -21,6 +21,8 @@ const Home = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
 
+
+
     const startRecognition = () => {
         try {
             if (!isSpeakingRef.current && !isRecogntionRef.current) {
@@ -46,7 +48,10 @@ const Home = () => {
             }, 1000);
         }
         synth.cancel();
-        synth.speak(utterence);
+        setTimeout(() => {
+            synth.speak(utterence);
+          }, 100); // Small delay helps mobile
+        
 
     }
 
@@ -92,6 +97,8 @@ const Home = () => {
         recognitionRef.current = recognition;
 
         let isMounted = true;
+
+
 
 
 
@@ -169,7 +176,32 @@ const Home = () => {
         }
 
 
+        const unlockAudio = () => {
+            try {
+                // Resume AudioContext
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === "suspended") {
+                    audioCtx.resume();
+                }
+
+                // Clear blocked speech queue (just in case)
+                window.speechSynthesis.cancel();
+            } catch (err) {
+                console.warn("Audio unlock failed:", err);
+            }
+
+            // Remove the listener after first interaction
+            document.removeEventListener("click", unlockAudio);
+            document.removeEventListener("touchstart", unlockAudio);
+        };
+
+        // Listen for first user interaction
+        document.addEventListener("click", unlockAudio);
+        document.addEventListener("touchstart", unlockAudio);
+
         return () => {
+            document.removeEventListener("click", unlockAudio);
+            document.removeEventListener("touchstart", unlockAudio);
             isMounted = false;
             clearTimeout(startTimeOut);
             recognition.stop();
