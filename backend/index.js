@@ -1,7 +1,9 @@
 import dotenv from "dotenv";
-dotenv.config();
-  import express from "express";
 
+dotenv.config();
+global.GEMINI_KEY = process.env.GEMINI_API_KEY;
+console.log("GEMINI_KEY from indexjs", global.GEMINI_KEY)
+  import express from "express";
   import connectDB from "./config/db.js";
   import authRouter from "./routes/auth.route.js";
   import userRouter from "./routes/user.route.js";
@@ -21,7 +23,6 @@ dotenv.config();
 
 
   const port = process.env.PORT;
-  app.listen(port, () => {
-
+  app.listen(port, () => { 
     console.log("Server is running on port " + port);
   });

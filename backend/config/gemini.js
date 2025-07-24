@@ -1,5 +1,9 @@
 import axios from 'axios';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyA70hY7MoSjPmKRQ76A6F-vhePMM2BH8t0`;
+import dotenv from 'dotenv';
+
+dotenv.config();
+const key = process.env.GEMINI_API_KEY;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
 
 const geminiResponse = async (prompt, userName, assistantName) => {
   try {
@@ -68,4 +72,3 @@ const geminiResponse = async (prompt, userName, assistantName) => {
   }
 }
 export default geminiResponse;
-

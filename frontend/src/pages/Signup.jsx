@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { UserDataContext } from '../context/UserContext';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const Signup = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ const Signup = () => {
   const [error, setError] = useState('');
   const { serverUrl,user, setUser } = useContext(UserDataContext);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -19,7 +21,7 @@ const Signup = () => {
         withCredentials: true
       });
       console.log(response);
-      navigate('/customize');
+      navigate('/signin');
       setUser(response.data);
       // Optionally, handle success (redirect, show message, etc.)
     } catch (error) {

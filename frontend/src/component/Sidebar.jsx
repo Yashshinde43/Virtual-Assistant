@@ -2,10 +2,10 @@ import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoSettingsOutline, IoLogOutOutline, IoCloseOutline } from 'react-icons/io5';
 import { UserDataContext } from '../context/UserContext';
-
+import axios from 'axios';
 const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     const [showHistory, setShowHistory] = useState(false);
-    const { user, setUser } = useContext(UserDataContext);
+    const { user, setUser, serverUrl } = useContext(UserDataContext);
     const navigate = useNavigate();
     const logout = async () => {
         try {
@@ -13,6 +13,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                 withCredentials: true,
             });
             setUser(null);
+            navigate('/signin');
             console.log("Logout Successful ", response);
         } catch (error) {
             console.log(error);
@@ -43,8 +44,8 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                             </Link>
                         </li>
                         <li>
-                            <button className='flex items-center p-2 rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200'>
-                                <IoLogOutOutline className="mr-3" onClick={ ()=>{logout()}} />
+                            <button className='flex items-center p-2 rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200' onClick={ ()=>{logout()}}>
+                                <IoLogOutOutline className="mr-3"  />
                                 Logout
                             </button>
                         </li>

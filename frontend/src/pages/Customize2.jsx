@@ -40,13 +40,13 @@ const Customize2 = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#232526] px-2 py-8">
-      <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-md relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-2 py-8">
+      <div className="backdrop-blur-lg bg-white/10 border border-gray-200 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-md relative">
         <div className="flex flex-col items-center mb-8">
-          <h2 className="text-3xl font-extrabold text-center text-cyan-400 mb-2 tracking-wide drop-shadow-[0_0_8px_#00d8ff]">
+          <h2 className="text-3xl font-extrabold text-center text-gray-100 mb-2 tracking-wide">
             Name Your Assistant
           </h2>
-          <p className="text-gray-300 text-sm text-center">Give your new virtual assistant a unique name.</p>
+          <p className="text-gray-400 text-sm text-center">Give your new virtual assistant a unique name.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="relative">
@@ -58,12 +58,12 @@ const Customize2 = () => {
               value={assistantName}
               onChange={e => setAssistantName(e.target.value)}
               required
-              className="peer w-full px-4 py-3 bg-transparent border-b-2 border-gray-400 text-white placeholder-transparent focus:outline-none focus:border-[#00d8ff] transition-all"
+              className="peer w-full px-4 py-3 bg-transparent border-b-2 border-gray-400 text-white placeholder-transparent focus:outline-none focus:border-gray-500 transition-all"
               placeholder="Assistant Name"
             />
             <label
               htmlFor="assistantName"
-              className="absolute left-4 -top-5 text-sm text-[#00d8ff] pointer-events-none transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-5 peer-focus:text-sm peer-focus:text-[#00d8ff]"
+              className="absolute left-4 -top-5 text-sm text-gray-500 pointer-events-none transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-5 peer-focus:text-sm peer-focus:text-gray-500"
             >
               Assistant Name
             </label>
@@ -79,7 +79,7 @@ const Customize2 = () => {
             </button>
             <button
               type="submit"
-              className="flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-gradient-to-r from-[#00d8ff] to-[#0077ff] text-white font-bold text-lg shadow-xl hover:from-[#0077ff] hover:to-[#00d8ff] focus:outline-none focus:ring-2 focus:ring-[#00d8ff] focus:ring-offset-2 drop-shadow-[0_0_16px_#00d8ff] transition-all duration-200 hover:scale-105 disabled:opacity-75 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-gray-800 text-white font-bold text-lg shadow-xl hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105 disabled:opacity-75 disabled:cursor-not-allowed"
               aria-label="Finish Setup"
               disabled={loading}
             >
@@ -94,7 +94,7 @@ const Customize2 = () => {
           </div>
         </form>
         {/* Neon border effect */}
-        <div className="absolute -inset-1 rounded-2xl pointer-events-none border-2 border-[#00d8ff] opacity-30 blur-xl animate-pulse"></div>
+        <div className="absolute -inset-1 rounded-2xl pointer-events-none border-2 border-gray-500 opacity-30 blur-xl animate-pulse"></div>
       </div>
     </div>
   );

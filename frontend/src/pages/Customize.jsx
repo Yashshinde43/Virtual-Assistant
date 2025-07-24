@@ -36,13 +36,13 @@ const Customize = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0f2027] via-[#2c5364] to-[#232526] px-2 py-8">
-      <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-md relative">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-2 py-8">
+      <div className="backdrop-blur-lg bg-white/10 border border-gray-200 rounded-2xl shadow-2xl p-6 sm:p-10 w-full max-w-md relative">
         <div className="flex flex-col items-center mb-8">
-          <h2 className="text-3xl font-extrabold text-center text-cyan-400 mb-2 tracking-wide drop-shadow-[0_0_8px_#00d8ff]">
+          <h2 className="text-3xl font-extrabold text-center text-gray-100 mb-2 tracking-wide">
             Choose Your Assistant's Avatar
           </h2>
-          <p className="text-gray-300 text-sm text-center">Pick a look for your virtual assistant</p>
+          <p className="text-gray-400 text-sm text-center">Pick a look for your virtual assistant</p>
         </div>
         <div className="grid grid-cols-3 gap-4 sm:gap-6 mb-8">
           {assistantImages.map((imgUrl, idx) => (
@@ -51,8 +51,8 @@ const Customize = () => {
               onClick={() => handlePresetImageClick(imgUrl)}
               className={`group focus:outline-none rounded-full transition-all duration-200 border-2 
                 ${selectedImage?.type === "preset" && selectedImage?.url === imgUrl
-                  ? "border-cyan-400 ring-2 ring-cyan-300 scale-105"
-                  : "border-white/20 hover:border-cyan-500 hover:scale-105"}
+                  ? "border-gray-400 ring-2 ring-gray-300 scale-105"
+                  : "border-white/20 hover:border-gray-500 hover:scale-105"}
                 bg-slate-900 shadow-lg w-full flex items-center justify-center`}
               tabIndex={0}
               onKeyDown={e => {
@@ -63,7 +63,7 @@ const Customize = () => {
               <img
                 src={imgUrl}
                 alt={`Assistant ${idx}`}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover group-hover:brightness-110 group-hover:shadow-cyan-400/30 group-hover:shadow-xl transition-all duration-200"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover group-hover:brightness-110 group-hover:shadow-gray-400/30 group-hover:shadow-xl transition-all duration-200"
               />
             </button>
           ))}
@@ -74,7 +74,7 @@ const Customize = () => {
           <div className="flex-1 h-px bg-white/20" />
         </div>
         <label className="block w-full text-center">
-          <span className="inline-block px-6 py-2 bg-[#00d8ff] hover:bg-[#0077ff] text-white font-bold rounded-xl shadow-lg cursor-pointer transition-all duration-200 tracking-wide text-base sm:text-lg">
+          <span className="inline-block px-6 py-2 bg-gray-800 hover:bg-gray-900 text-white font-bold rounded-xl shadow-lg cursor-pointer transition-all duration-200 tracking-wide text-base sm:text-lg">
             Upload Image
             <input
               type="file"
@@ -92,14 +92,14 @@ const Customize = () => {
             <img
               src={selectedImage.url}
               alt="Selected"
-              className="w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full border-4 border-cyan-400 shadow-xl shadow-cyan-400/20 bg-slate-900 object-cover animate-fade-in"
+              className="w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full border-4 border-gray-400 shadow-xl shadow-gray-400/20 bg-slate-900 object-cover animate-fade-in"
             />
           )}
           {selectedImage?.type === "upload" && (
             <img
               src={URL.createObjectURL(selectedImage.file)}
               alt="Selected"
-              className="w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full border-4 border-cyan-400 shadow-xl shadow-cyan-400/20 bg-slate-900 object-cover animate-fade-in"
+              className="w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-full border-4 border-gray-400 shadow-xl shadow-gray-400/20 bg-slate-900 object-cover animate-fade-in"
             />
           )}
           {!selectedImage && (
@@ -110,7 +110,7 @@ const Customize = () => {
           {selectedImage && (
             <div className="flex justify-center mt-8">
               <button
-                className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-[#00d8ff] to-[#0077ff] text-white font-bold text-lg shadow-xl hover:from-[#0077ff] hover:to-[#00d8ff] focus:outline-none focus:ring-2 focus:ring-[#00d8ff] focus:ring-offset-2 drop-shadow-[0_0_16px_#00d8ff] transition-all duration-200 hover:scale-105"
+                className="flex items-center gap-2 px-6 py-3 rounded-full bg-gray-800 text-white font-bold text-lg shadow-xl hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 hover:scale-105"
                 onClick={() => {
                   console.log(selectedImage)
                   navigate("/customize2")
@@ -126,7 +126,7 @@ const Customize = () => {
 
         </div>
         {/* Neon border effect */}
-        <div className="absolute -inset-1 rounded-2xl pointer-events-none border-2 border-[#00d8ff] opacity-30 blur-xl animate-pulse"></div>
+        <div className="absolute -inset-1 rounded-2xl pointer-events-none border-2 border-gray-500 opacity-30 blur-xl animate-pulse"></div>
       </div>
     </div>
   );
