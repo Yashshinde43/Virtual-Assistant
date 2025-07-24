@@ -15,7 +15,7 @@ console.log("GEMINI_KEY from indexjs", global.GEMINI_KEY)
   app.use(express.json());
   app.use(cookieParser());
   app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://ai-virtual-assistant-d4aw.onrender.com",
     credentials: true,
   }));
   app.use("/api/auth", authRouter);
