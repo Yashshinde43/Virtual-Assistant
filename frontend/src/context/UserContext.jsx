@@ -5,7 +5,7 @@ export const UserDataContext = createContext();
 
 const UserContext = ({ children }) => {
     const [user, setUser] = useState(null);
-    const serverUrl = "http://localhost:5000";
+    const serverUrl = "https://virtual-assistant-di2q.onrender.com";
     const [selectedImage, setSelectedImage] = useState(null);
 
     const geminiResponse = async (command) => {
