@@ -15,6 +15,7 @@ export const getCurrentUser = async (req, res) => {
         return res.status(500).json({ message: 'getCurretnUser error from controller, Internal Server Error.' });
     }
 }
+
 export const updateUser = async (req, res) => {
     try {
         console.log(req.body)
@@ -99,4 +100,22 @@ export const aiAssistant = async (req, res) => {
         return res.status(500).json({ message: 'aiAssistant error from controller, Internal Server Error.' });
     }
 
+}
+
+export const getHistory = async (req, res) => {
+    try {
+        const userId = req.userId;
+        if (!userId) {
+            // This should be caught by auth middleware, but good to have.
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        const user = await User.findById(userId).select('history');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.status(200).json({ history: user.history.reverse() });
+    } catch (error) {
+        console.error("Error fetching history:", error);
+        res.status(500).json({ message: 'Failed to fetch history.' });
+    }
 }

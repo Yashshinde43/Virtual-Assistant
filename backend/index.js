@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 
 dotenv.config();
 global.GEMINI_KEY = process.env.GEMINI_API_KEY;
-console.log("GEMINI_KEY from indexjs", global.GEMINI_KEY)
   import express from "express";
   import connectDB from "./config/db.js";
   import authRouter from "./routes/auth.route.js";
