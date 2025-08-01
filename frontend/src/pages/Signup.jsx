@@ -21,7 +21,9 @@ const Signup = () => {
         withCredentials: true
       });
       console.log(response);
-      navigate('/signin');
+        setTimeout(() => {
+        navigate('/signin');
+      }, 2000);
       setUser(response.data);
       // Optionally, handle success (redirect, show message, etc.)
     } catch (error) {

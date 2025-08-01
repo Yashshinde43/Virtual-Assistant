@@ -13,7 +13,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={user?.assistantName && user?.assistantImage ? <Home /> : <Navigate to="/customize" />} />
-      <Route path="/signup" element={!user ? <Signup /> : <Navigate to={"/"} />} />
+      <Route path="/signup" element={!user ? <Signup /> : <Navigate to={"/signin"} />} />
       <Route path="/signin" element={!user ? <Signin /> : <Navigate to={"/"} />} />
       <Route path="/customize" element={user ? <Customize /> : <Navigate to={"/signup"}/>} />
       <Route path="/customize2" element={user ? <Customize2 /> : <Navigate to={"/signin"}/>} />

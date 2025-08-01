@@ -1,8 +1,11 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, lazy, Suspense } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { IoSettingsOutline, IoLogOutOutline, IoCloseOutline } from 'react-icons/io5';
+import { IoSettingsOutline, IoLogOutOutline } from 'react-icons/io5';
 import { UserDataContext } from '../context/UserContext';
 import axios from 'axios';
+
+const LazyHistoryList = lazy(() => import('./HistoryList')); // lazy load
+
 const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     const [showHistory, setShowHistory] = useState(false);
     const {  setUser, serverUrl } = useContext(UserDataContext);
@@ -10,9 +13,10 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyError, setHistoryError] = useState('');
     const navigate = useNavigate();
+
     const logout = async () => {
         try {
-            const response  = await axios.get(`${serverUrl}/api/auth/signout`, {
+            const response = await axios.get(`${serverUrl}/api/auth/signout`, {
                 withCredentials: true,
             });
             setUser(null);
@@ -21,6 +25,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
         } catch (error) {
             console.log(error);
         }
+<<<<<<< HEAD
     }
 
     const handleToggleHistory = async () => {
@@ -45,6 +50,10 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             }
         }
     }
+=======
+    };
+
+>>>>>>> c5f767c0e86e5bdfd07fe1fd006f8995b8498ca8
     return (
         <>
             <div
@@ -52,30 +61,26 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                 onClick={toggleSidebar}
             />
             <aside
-                className={
-                    `fixed top-0 left-0 h-full bg-gray-800 bg-opacity-100 backdrop-blur-md text-white w-64 p-5 z-20 ` +
-                    `transform transition-transform duration-300 ease-in-out ` +
-                    `${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} ` +
-                    `lg:translate-x-0`
-                }
+                className={`fixed top-0 left-0 h-full bg-gray-800 text-white w-64 p-5 z-20 transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
             >
-                
                 <h2 className='text-2xl font-bold mb-8 text-gray-200'>V-Assistant</h2>
                 <nav>
                     <ul>
                         <li className='mb-4'>
-                            <Link to="/customize" className='flex items-center p-2 rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200'>
+                            <Link to="/customize" className='flex items-center p-2 rounded-lg hover:bg-gray-700 transition'>
                                 <IoSettingsOutline className="mr-3" />
                                 Customize
                             </Link>
                         </li>
                         <li>
-                            <button className='flex items-center p-2 rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200' onClick={ ()=>{logout()}}>
-                                <IoLogOutOutline className="mr-3"  />
+                            <button
+                                className='flex items-center p-2 rounded-lg hover:bg-gray-700 transition'
+                                onClick={logout}
+                            >
+                                <IoLogOutOutline className="mr-3" />
                                 Logout
                             </button>
                         </li>
-                        {/* here add a button */}
                         <div className="mt-4">
                             <button
                                 className="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg shadow transition mb-2 border border-gray-600 flex items-center justify-between"
@@ -86,6 +91,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                             </button>
                             {showHistory && (
                                 <div className="bg-gray-100 rounded-lg shadow-inner p-4 max-h-60 overflow-y-auto border border-gray-200 animate-fadeIn">
+<<<<<<< HEAD
                                     {historyLoading ? (
                                         <div className="text-gray-500 text-center">Loading history...</div>
                                     ) : historyError ? (
@@ -102,6 +108,11 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                                     ) : (
                                         <div className="text-gray-500 text-center">No history found.</div>
                                     )}
+=======
+                                    <Suspense fallback={<div className="text-center text-gray-400">Loading history...</div>}>
+                                        <LazyHistoryList history={user.history} />
+                                    </Suspense>
+>>>>>>> c5f767c0e86e5bdfd07fe1fd006f8995b8498ca8
                                 </div>
                             )}
                         </div>
