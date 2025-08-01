@@ -8,7 +8,7 @@ const LazyHistoryList = lazy(() => import('./HistoryList')); // lazy load
 
 const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
     const [showHistory, setShowHistory] = useState(false);
-    const {  setUser, serverUrl } = useContext(UserDataContext);
+    const {  user, setUser, serverUrl } = useContext(UserDataContext);
     const [history, setHistory] = useState([]);
     const [historyLoading, setHistoryLoading] = useState(false);
     const [historyError, setHistoryError] = useState('');
@@ -25,7 +25,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
         } catch (error) {
             console.log(error);
         }
-<<<<<<< HEAD
     }
 
     const handleToggleHistory = async () => {
@@ -50,10 +49,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             }
         }
     }
-=======
-    };
 
->>>>>>> c5f767c0e86e5bdfd07fe1fd006f8995b8498ca8
     return (
         <>
             <div
@@ -91,7 +87,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                             </button>
                             {showHistory && (
                                 <div className="bg-gray-100 rounded-lg shadow-inner p-4 max-h-60 overflow-y-auto border border-gray-200 animate-fadeIn">
-<<<<<<< HEAD
                                     {historyLoading ? (
                                         <div className="text-gray-500 text-center">Loading history...</div>
                                     ) : historyError ? (
@@ -108,11 +103,9 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
                                     ) : (
                                         <div className="text-gray-500 text-center">No history found.</div>
                                     )}
-=======
                                     <Suspense fallback={<div className="text-center text-gray-400">Loading history...</div>}>
                                         <LazyHistoryList history={user.history} />
                                     </Suspense>
->>>>>>> c5f767c0e86e5bdfd07fe1fd006f8995b8498ca8
                                 </div>
                             )}
                         </div>
