@@ -45,12 +45,27 @@ export const aiAssistant = async (req, res) => {
         const response = await geminiResponse(command, userName, assistantName);
         console.log(response)
 
+        if (!response) {
+            return res.status(500).json({ 
+                message: 'Failed to get response from AI. Please check your API key and try again.' 
+            });
+        }
+
         const jsonMatch = response.match(/{[\s\S]*}/);
         if (!jsonMatch) {
+            console.error("No JSON found in response:", response);
             return res.status(400).json({ message: 'Sorry I did not understand.' });
         }
 
-        let geminiResult = JSON.parse(jsonMatch[0]);
+        let geminiResult;
+        try {
+            geminiResult = JSON.parse(jsonMatch[0]);
+        } catch (parseError) {
+            console.error("JSON Parse Error:", parseError);
+            console.error("Response text:", response);
+            console.error("Matched JSON:", jsonMatch[0]);
+            return res.status(500).json({ message: 'Failed to parse AI response.' });
+        }
         const type = geminiResult.type;
 
         switch (type) {
@@ -72,7 +87,7 @@ export const aiAssistant = async (req, res) => {
                     userInput: geminiResult.userInput,
                     response: `Today is ${moment().format('dddd')}`
                 });
-            case 'get_date':
+            case 'get_month':
                 return res.json({
                     type,
                     userInput: geminiResult.userInput,

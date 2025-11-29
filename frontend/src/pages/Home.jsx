@@ -25,34 +25,85 @@ const Home = () => {
 
     const startRecognition = () => {
         try {
-            if (!isSpeakingRef.current && !isRecogntionRef.current) {
-                recognitionRef.current?.start();
-                setListening(true);
+            if (!recognitionRef.current) return;
+            
+            // Check if already running or speaking
+            if (isRecogntionRef.current || isSpeakingRef.current) {
+                return;
             }
+
+            // Check if recognition is already active (with fallback for browsers that don't support state)
+            try {
+                if (recognitionRef.current.state && 
+                    (recognitionRef.current.state === 'running' || recognitionRef.current.state === 'starting')) {
+                    return;
+                }
+            } catch (e) {
+                // State property might not be available in all browsers, continue
+            }
+
+            recognitionRef.current.start();
+            setListening(true);
         } catch (error) {
-            if (!error.message.includes("start")) {
+            // Handle specific error types
+            if (error.name === 'InvalidStateError') {
+                // Recognition is already running, ignore
+                return;
+            } else if (error.name === 'NotAllowedError') {
+                console.warn("Microphone permission denied");
+            } else if (error.name === 'NoSpeechError') {
+                // No speech detected, will retry automatically
+                return;
+            } else {
                 console.log("Recognition Error: ", error);
             }
         }
     }
 
     const speak = (text) => {
-        const utterence = new SpeechSynthesisUtterance(text);
-        isSpeakingRef.current = true;
-        utterence.onend = () => {
-            setAiText("")
-            isSpeakingRef.current = false;
-
-            setTimeout(() => {
-                startRecognition()
-            }, 1000);
-        }
-        synth.cancel();
-        setTimeout(() => {
-            synth.speak(utterence);
-          }, 100); // Small delay helps mobile
+        if (!text || text.trim() === '') return;
         
+        // Stop recognition before speaking
+        try {
+            if (recognitionRef.current && isRecogntionRef.current) {
+                recognitionRef.current.stop();
+                isRecogntionRef.current = false;
+                setListening(false);
+            }
+        } catch (error) {
+            console.warn("Error stopping recognition:", error);
+        }
 
+        // Cancel any ongoing speech
+        synth.cancel();
+        
+        // Wait a bit for cancellation to complete
+        setTimeout(() => {
+            const utterence = new SpeechSynthesisUtterance(text);
+            isSpeakingRef.current = true;
+            
+            utterence.onend = () => {
+                setAiText("")
+                isSpeakingRef.current = false;
+                
+                // Wait a bit longer before restarting recognition
+                setTimeout(() => {
+                    startRecognition();
+                }, 1500);
+            }
+            
+            utterence.onerror = (event) => {
+                console.warn("Speech synthesis error:", event);
+                isSpeakingRef.current = false;
+                setAiText("");
+                // Restart recognition even if speech fails
+                setTimeout(() => {
+                    startRecognition();
+                }, 1000);
+            }
+            
+            synth.speak(utterence);
+        }, 200);
     }
 
     const handleCommand = (data) => {
@@ -102,18 +153,36 @@ const Home = () => {
 
 
 
+        // Initial recognition start with better error handling
         const startTimeOut = setTimeout(() => {
             if (isMounted && !isSpeakingRef.current && !isRecogntionRef.current) {
                 try {
-                    recognition.start()
-                    console.log("Recognition request Started");
+                    // Check if recognition is already running (with fallback)
+                    let canStart = true;
+                    try {
+                        if (recognition.state === 'running' || recognition.state === 'starting') {
+                            canStart = false;
+                        }
+                    } catch (e) {
+                        // State property might not be available, continue
+                    }
+                    
+                    if (canStart) {
+                        recognition.start();
+                        console.log("Recognition request Started");
+                    }
                 } catch (error) {
-                    if (error.name !== "InvalidStateError") {
+                    if (error.name === "InvalidStateError") {
+                        // Already running, ignore
+                        return;
+                    } else if (error.name === "NotAllowedError") {
+                        console.error("Microphone permission denied. Please allow microphone access.");
+                    } else {
                         console.log("Start Error: ", error);
                     }
                 }
             }
-        }, 1000);
+        }, 1500); // Increased delay for better initialization
 
 
         recognition.onstart = () => {
@@ -121,58 +190,185 @@ const Home = () => {
             isRecogntionRef.current = true;
             setListening(true);
         }
+        
         recognition.onend = () => {
             console.log('Recognition ended');
             isRecogntionRef.current = false;
             setListening(false);
+            
+            // Only restart if component is mounted, not speaking, and recognition was not manually stopped
             if (isMounted && !isSpeakingRef.current) {
+                // Add a delay to prevent immediate restart issues
                 setTimeout(() => {
-                    if (isMounted) {
+                    if (isMounted && !isSpeakingRef.current && !isRecogntionRef.current) {
                         try {
-                            recognition.start();
-                            console.log("Recognition started!")
+                            // Double-check state before starting (with fallback)
+                            let canStart = true;
+                            try {
+                                if (recognition.state === 'running' || recognition.state === 'starting') {
+                                    canStart = false;
+                                }
+                            } catch (e) {
+                                // State property might not be available, continue
+                            }
+                            
+                            if (canStart) {
+                                recognition.start();
+                                console.log("Recognition auto-restarted");
+                            }
                         } catch (error) {
-                            console.log("Recognition Error: ", error);
+                            // Only log non-expected errors
+                            if (error.name !== 'InvalidStateError') {
+                                console.log("Recognition restart error: ", error);
+                            }
                         }
                     }
-                }, 1000)
+                }, 1500); // Increased delay for better stability
             }
         }
 
-
         recognition.onerror = (event) => {
-            console.warn("Error: ", event);
+            console.warn("Recognition error: ", event.error);
             isRecogntionRef.current = false;
             setListening(false);
-            if (event.error !== "aborted" && isMounted && !isSpeakingRef.current) {
+            
+            // Handle different error types
+            if (event.error === "aborted") {
+                // Recognition was manually stopped, don't restart
+                return;
+            } else if (event.error === "not-allowed") {
+                // Permission denied, don't keep trying
+                console.error("Microphone permission denied. Please allow microphone access.");
+                return;
+            } else if (event.error === "no-speech") {
+                // No speech detected, can retry
+                if (isMounted && !isSpeakingRef.current) {
+                    setTimeout(() => {
+                        if (isMounted && !isSpeakingRef.current && !isRecogntionRef.current) {
+                            try {
+                                let canStart = true;
+                                try {
+                                    if (recognition.state === 'running' || recognition.state === 'starting') {
+                                        canStart = false;
+                                    }
+                                } catch (e) {
+                                    // State might not be available
+                                }
+                                
+                                if (canStart) {
+                                    recognition.start();
+                                }
+                            } catch (error) {
+                                if (error.name !== 'InvalidStateError') {
+                                    console.log("Recognition restart after no-speech error: ", error);
+                                }
+                            }
+                        }
+                    }, 2000);
+                }
+                return;
+            } else if (event.error === "network") {
+                // Network error, wait longer before retry
+                if (isMounted && !isSpeakingRef.current) {
+                    setTimeout(() => {
+                        if (isMounted && !isSpeakingRef.current && !isRecogntionRef.current) {
+                            try {
+                                let canStart = true;
+                                try {
+                                    if (recognition.state === 'running' || recognition.state === 'starting') {
+                                        canStart = false;
+                                    }
+                                } catch (e) {
+                                    // State might not be available
+                                }
+                                
+                                if (canStart) {
+                                    recognition.start();
+                                }
+                            } catch (error) {
+                                if (error.name !== 'InvalidStateError') {
+                                    console.log("Recognition restart after network error: ", error);
+                                }
+                            }
+                        }
+                    }, 3000);
+                }
+                return;
+            }
+            
+            // For other errors, try to restart after a delay
+            if (isMounted && !isSpeakingRef.current) {
                 setTimeout(() => {
-                    if (isMounted) {
+                    if (isMounted && !isSpeakingRef.current && !isRecogntionRef.current) {
                         try {
-                            recognition.start();
-                            console.log("Recognition started!")
+                            let canStart = true;
+                            try {
+                                if (recognition.state === 'running' || recognition.state === 'starting') {
+                                    canStart = false;
+                                }
+                            } catch (e) {
+                                // State might not be available
+                            }
+                            
+                            if (canStart) {
+                                recognition.start();
+                                console.log("Recognition restarted after error");
+                            }
                         } catch (error) {
-                            console.log("Recognition Error: ", error);
+                            if (error.name !== 'InvalidStateError') {
+                                console.log("Recognition Error: ", error);
+                            }
                         }
                     }
-                }, 1000);
+                }, 2000);
             }
         }
 
         recognition.onresult = async (event) => {
-            const transcript = event.results[event.results.length - 1][0].transcript.trim();
-            if (transcript.toLowerCase().includes(user.assistantName.toLowerCase())) {
-                setUserText(transcript)
-                setAiText("")
-                isRecogntionRef.current = false;
-                setListening(false);
-                recognition.stop();
-                const data = await geminiResponse(transcript);
-                handleCommand(data);
-                setAiText(data.response)
-                setUserText("")
-                console.log("This is data: ", data);
+            try {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                
+                if (!transcript || transcript.length === 0) {
+                    return;
+                }
+                
+                if (transcript.toLowerCase().includes(user.assistantName.toLowerCase())) {
+                    // Stop recognition immediately to prevent multiple triggers
+                    isRecogntionRef.current = false;
+                    setListening(false);
+                    
+                    try {
+                        recognition.stop();
+                    } catch (error) {
+                        console.warn("Error stopping recognition:", error);
+                    }
+                    
+                    setUserText(transcript);
+                    setAiText("");
+                    
+                    try {
+                        const data = await geminiResponse(transcript);
+                        
+                        if (data && data.response) {
+                            handleCommand(data);
+                            setAiText(data.response);
+                        } else {
+                            console.warn("Invalid response from Gemini:", data);
+                            setAiText("Sorry, I couldn't process that request.");
+                        }
+                    } catch (error) {
+                        console.error("Error processing command:", error);
+                        setAiText("Sorry, I encountered an error processing your request.");
+                    } finally {
+                        // Clear user text after processing
+                        setTimeout(() => {
+                            setUserText("");
+                        }, 1000);
+                    }
+                }
+            } catch (error) {
+                console.error("Error in recognition.onresult:", error);
             }
-
         }
 
 
@@ -181,11 +377,36 @@ const Home = () => {
                 // Resume AudioContext
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === "suspended") {
-                    audioCtx.resume();
+                    audioCtx.resume().then(() => {
+                        console.log("Audio context resumed");
+                    }).catch(err => {
+                        console.warn("Failed to resume audio context:", err);
+                    });
                 }
 
                 // Clear blocked speech queue (just in case)
                 window.speechSynthesis.cancel();
+                
+                // Try to get microphone permission by starting recognition briefly
+                // This helps with browsers that require user interaction
+                if (recognition && !isRecogntionRef.current && !isSpeakingRef.current) {
+                    setTimeout(() => {
+                        try {
+                            if (recognition.state !== 'running' && recognition.state !== 'starting') {
+                                recognition.start();
+                                setTimeout(() => {
+                                    try {
+                                        recognition.stop();
+                                    } catch (e) {
+                                        // Ignore stop errors
+                                    }
+                                }, 100);
+                            }
+                        } catch (e) {
+                            // Ignore - permission might not be granted yet
+                        }
+                    }, 100);
+                }
             } catch (err) {
                 console.warn("Audio unlock failed:", err);
             }

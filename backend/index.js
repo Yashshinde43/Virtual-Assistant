@@ -14,7 +14,9 @@ global.GEMINI_KEY = process.env.GEMINI_API_KEY;
   app.use(express.json());
   app.use(cookieParser());
   app.use(cors({
-    origin: "https://ai-virtual-assistant-d4aw.onrender.com",
+    origin: process.env.NODE_ENV === 'production' 
+      ? "https://ai-virtual-assistant-d4aw.onrender.com" 
+      : "http://localhost:5173", // or whatever port your Vite dev server uses
     credentials: true,
   }));
   app.use("/api/auth", authRouter);

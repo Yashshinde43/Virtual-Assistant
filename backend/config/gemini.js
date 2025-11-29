@@ -2,10 +2,35 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const key = process.env.GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+let key = process.env.GEMINI_API_KEY;
 
+// Remove quotes if present (common issue with .env files)
+if (key) {
+  key = key.replace(/^["']|["']$/g, '');
+}
+
+// Check if API key exists
+if (!key) {
+  console.error("❌ ERROR: GEMINI_API_KEY is not set in environment variables!");
+} else {
+  console.log("✅ API Key loaded (first 10 chars):", key.substring(0, 10) + "...");
+}
+
+// Use v1beta endpoint with correct model name
+// gemini-1.5-pro or gemini-1.5-flash are available in v1beta
+// gemini-pro is only available in v1 API, not v1beta
+// Change 'gemini-1.5-pro' to the current widely supported model alias
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${key}`;
 const geminiResponse = async (prompt, userName, assistantName) => {
+  // Validate API key before making request
+  if (!key) {
+    console.error("❌ Cannot make API call: GEMINI_API_KEY is missing!");
+    return null;
+  }
+  
+  console.log("📤 Making request to Gemini API...");
+  console.log("URL:", GEMINI_URL.replace(key, "API_KEY_HIDDEN"));
+  
   try {
     const command = `You are a virtual assistant named ${assistantName} created by ${userName}. You are not google. You will now behave like a voice-enabled assistance.
         Your task is to understand user's natural language input and respond with a JSON object like this: 
@@ -64,11 +89,52 @@ const geminiResponse = async (prompt, userName, assistantName) => {
         }
       }
     );
-    console.log("API KEY: ", process.env.GEMINI_API_KEY);
-    console.log("this is gemini.js", response.data);
-    return response.data.candidates[0].content.parts[0].text;
+    console.log("✅ Successfully received response from Gemini API");
+    console.log("Response data:", JSON.stringify(response.data, null, 2));
+    
+    // Safely access the response text
+    if (!response.data || !response.data.candidates || !response.data.candidates[0]) {
+      console.error("Unexpected response structure:", JSON.stringify(response.data, null, 2));
+      return null;
+    }
+    
+    const candidate = response.data.candidates[0];
+    if (!candidate.content || !candidate.content.parts || !candidate.content.parts[0]) {
+      console.error("Unexpected candidate structure:", JSON.stringify(candidate, null, 2));
+      return null;
+    }
+    
+    return candidate.content.parts[0].text;
   } catch (error) {
-    console.log("Error generating response from Gemini: ", error);
+    console.error("❌ Error generating response from Gemini:");
+    console.error("Error message:", error.message);
+    
+    if (error.response) {
+      // Server responded with error status
+      console.error("API Error Status:", error.response.status);
+      console.error("API Error Data:", JSON.stringify(error.response.data, null, 2));
+      
+      if (error.response.status === 403) {
+        console.error("❌ 403 Forbidden - Possible causes:");
+        console.error("   1. Invalid API key");
+        console.error("   2. API key doesn't have Gemini API enabled");
+        console.error("   3. API key quota exceeded");
+        console.error("   4. Wrong API endpoint version");
+      } else if (error.response.status === 400) {
+        console.error("❌ 400 Bad Request - Check request format");
+      } else if (error.response.status === 401) {
+        console.error("❌ 401 Unauthorized - Invalid API key");
+      }
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error("❌ No response received from API");
+      console.error("Request details:", error.request);
+    } else {
+      // Error setting up the request
+      console.error("❌ Error setting up request:", error.message);
+    }
+    
+    return null;
   }
 }
 export default geminiResponse;
