@@ -13,7 +13,7 @@ if (key) {
 if (!key) {
   console.error("❌ ERROR: GEMINI_API_KEY is not set in environment variables!");
 } else {
-  console.log("✅ API Key loaded (first 10 chars):", key.substring(0, 10) + "...");
+  console.log("✅ API Key loaded successfully");
 }
 
 // Use v1beta endpoint with correct model name
@@ -29,7 +29,6 @@ const geminiResponse = async (prompt, userName, assistantName) => {
   }
   
   console.log("📤 Making request to Gemini API...");
-  console.log("URL:", GEMINI_URL.replace(key, "API_KEY_HIDDEN"));
   
   try {
     const command = `You are a virtual assistant named ${assistantName} created by ${userName}. You are not google. You will now behave like a voice-enabled assistance.
@@ -128,7 +127,7 @@ const geminiResponse = async (prompt, userName, assistantName) => {
     } else if (error.request) {
       // Request was made but no response received
       console.error("❌ No response received from API");
-      console.error("Request details:", error.request);
+      // Request details not logged to avoid exposing API key in URL
     } else {
       // Error setting up the request
       console.error("❌ Error setting up request:", error.message);
